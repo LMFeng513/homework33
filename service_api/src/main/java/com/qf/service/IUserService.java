@@ -1,22 +1,13 @@
 package com.qf.service;
 
-
-/*
-    @author: LMFeng
-    @date: 2019-06-29 17:07
-    @desc:
-  */
-
-
 import com.qf.entity.User;
 
 import java.util.List;
 import java.util.Map;
 
 public interface IUserService {
-
-     int register(User user);
-
-     List<User> login(Map map);
-
+    public Integer insertUser(User user);
+    public User  queryUser(User user);
+    public List<User> getUserByName(Map map);
+    public Integer updateUser(User user);
 }

@@ -8,22 +8,22 @@
 <body>
     <h5 th:text="${msg}"></h5>
     <h2>用户注册</h2>
-    <form action="/user/register" method="post">
+    <form method="post" action="/user/register">
         <table border="1">
             <tr>
-                <td>用户名：</td><td><input id="name" name="name" type="text"/></td>
+                <td>用户名：</td><td><input type="text" name="username" id="username"/></td>
             </tr>
             <tr>
-                <td>密码：</td><td><input id="password" name="password" type="text"/></td>
+                <td>密码：</td><td><input type="text" name="password" id="password"/></td>
             </tr>
             <tr>
-                <td>邮箱：</td><td><input id="email" name="email" type="text"/></td>
+                <td>邮箱：</td><td><input type="text" name="email" id="email"/></td>
             </tr>
              <tr>
-                 <td colspan="2"><button id="sendcode" type="button">验证邮箱获取验证码</button></td>
+                 <td colspan="2"><button type="button" id="sendcode">验证邮箱获取验证码</button></td>
              </tr>
             <tr>
-                <td>验证码：</td><td><input id="code" name="code" type="text"/></td>
+                <td>验证码：</td><td><input type="text" name="code" id="code"/></td>
             </tr>
             <tr>
                 <td colspan="2"><input type="submit" value="提交"/></td>
@@ -35,7 +35,7 @@
         $(function () {
             $("#email").focus(function () {
                 $("#email").val().trim();
-            });
+            })
             /*填写邮箱失去焦点对邮箱格式进行认证*/
             $("#email").blur(function () {
                 var reg="(\w)+[@](\w)+[.](\w)+";
@@ -49,9 +49,9 @@
                 }else if(email.val().test(reg)){
                     alert("邮箱格式正确")
                 }
-            });
+            })
             $("#sendcode").click(function () {
-                var name=$("#name").val();
+                var username=$("#username").val();
                 var password=$("#password").val();
                 var email=$("#email").val();
                 $.ajax({
@@ -59,7 +59,7 @@
                     url: "/user/registermessage",
                     contentType: "application/json; charset=utf-8",
                     data: JSON.stringify({
-                        "name":name,
+                        "username":username,
                         "password":password,
                         "email":email
                     }),

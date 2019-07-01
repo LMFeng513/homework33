@@ -1,18 +1,12 @@
 package com.qf.controller;
 
-  /*
-    @author: LMFeng
-    @date: 2019-06-28 19:50
-    @desc:
-  */
 import com.alibaba.dubbo.config.annotation.Reference;
+
 import com.qf.entity.Message;
 import com.qf.entity.User;
 import com.qf.service.IMessageService;
 import com.qf.service.IUserService;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,52 +19,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-/*  mail:
-    protocol: smtp
-    host: smtp.sina.com
-    username: lmf513
-    password: lmf123456
-*/
+
 @Controller
 @RequestMapping("/user")
-@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})
 public class UserController {
+    /*rpc远程调用服务*/
     @Reference
     private IUserService userService;
+
     @Reference
     private IMessageService messageService;
-
     @RequestMapping("/tologin")
-    public String toLogin(){
-
+    public String tologin(){
         return "login";
     }
-
-    @RequestMapping("/login")
-    public Object login(@RequestParam String name, @RequestParam String password){
-        Map<String,Object> map = new HashMap<>();
-        map.put("username",name);
-        map.put("password",password);
-        List<User> users = userService.login(map);
-        if(users!=null){
-            return  "success";
-        }
-        return  "login";
-    }
-
     @RequestMapping("/toregister")
-    public String toRegister(){
-
+    public String toregister(){
         return "register";
     }
-
-
+    /*发送注册验证码*/
     @ResponseBody
     @RequestMapping("/registermessage")
     public Object sendRegisterMessage(@RequestBody User user, HttpServletRequest request){
         System.out.println(user);
         Message message = new Message();
-        message.setSendurl("lmfeng513@sina.com");
+        message.setSendurl("lmf513@sina.com");
         message.setTitle("发送验证码");
         message.setReceiveurl(user.getEmail());
         Random random = new Random();
@@ -86,46 +59,63 @@ public class UserController {
         System.out.println("11111");
         System.out.println(user+"==="+message);
         if(request.getSession().getAttribute("code").equals(message.getCode())){
-            userService.register(user);
-            model.addAttribute("msg","");
-            return "login";
+          userService.insertUser(user);
+          model.addAttribute("msg","");
+          return "login";
         }
         model.addAttribute("msg","注册失败,请重新注册");
         return "register";
     }
-
-
-
-    /*@RequestMapping("/sendMail")
-    @ResponseBody
-    public String sendMail(String email) {
-
-        //创建一封邮件
-        MimeMessage mimeMessage =javamailSender.createMimeMessage();
-        MimeMessageHelper messageHelper=new MimeMessageHelper(mimeMessage);
-
-        //设置标题
-        try {
-            messageHelper.setSubject("注册认证");
-
-            //设置发送者
-            messageHelper.setFrom("lmfeng513@sina.com");
-
-            //设置接收者
-            messageHelper.setTo(email);
-
-            messageHelper.setText("请点击<a href='localhost:8080/xgpassword'>这里</a>找回密码~", true);
-
-
-            javamailSender.send(mimeMessage);
-            return "succ";
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-
-
-        return "error";
+    /*跳转到重置密码填写用户名页面*/
+    @RequestMapping("/tofindPsw")
+    public Object tofindPsw(){
+       return "findPsw";
     }
-*/
-
+    /*根据填写的用户名得到邮箱地址发送邮箱*/
+    @RequestMapping("/findPsw")
+    public Object findPsw(String username){
+        Map<String,Object> map = new HashMap<>();
+        map.put("username",username);
+      List<User> users=userService.getUserByName(map);
+      if(users==null){
+          return "findPsw";
+      }
+        User user = users.get(0);
+        Message message = new Message();
+        message.setSendurl("lmf513@sina.com");
+        message.setTitle("密码重置");
+        message.setReceiveurl(user.getEmail());
+        message.setReplycontent("请点击<a href='http://10.36.138.213:8080/user/togetPsw?username="+username+" '>这里</a>找回密码~");
+        messageService.sendRegisterMessage(message);
+        return "login";
+    }
+    /*重置密码用户名初始化*/
+    @RequestMapping("/togetPsw")
+    public Object togetPsw(@RequestParam String username, Model model){
+        model.addAttribute("username" ,username);
+        return  "updatePsw";
+    }
+    /*根据隐藏的用户名和填写密码修改用户密码*/
+    @RequestMapping("/updatePsw")
+    public Object updatePsw(User user){
+        Map<String,Object> map = new HashMap<>();
+        map.put("username",user.getUsername());
+        List<User> users = userService.getUserByName(map);
+        User user1 = users.get(0);
+        user1.setPassword(user.getPassword());
+        userService.updateUser(user1);
+        return  "login";
+    }
+    /*根据填写的用户名和密码用户登录*/
+    @RequestMapping("/login")
+    public Object login(@RequestParam String username,@RequestParam String password){
+        Map<String,Object> map = new HashMap<>();
+        map.put("username",username);
+        map.put("password",password);
+        List<User> users = userService.getUserByName(map);
+        if(users!=null){
+            return  "success";
+        }
+        return  "login";
+    }
 }

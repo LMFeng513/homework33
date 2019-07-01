@@ -14,11 +14,11 @@ dubbo:
 spring:
   mail:
     protocol: smtp
-    host: smtp.sina.com
-    username: lmfeng513@sina.com
+    host: smtp.sina.cn
+    username: lmf513@sina.com
     password: lmf123456
   datasource:
-    url: jdbc:mysql:///traindb
+    url: jdbc:mysql:///test
     username: root
     password: root
     driver-class-name: com.mysql.jdbc.Driver
